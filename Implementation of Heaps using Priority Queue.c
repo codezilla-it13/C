@@ -1,45 +1,41 @@
 #include <stdio.h>
 #include <math.h>
- 
+
 #define MAX 100
 
 void swap(int*, int*);
 void display(int[], int);
-void insert(int[], int, int, int);
-int del_hi_priori(int[], int, int);
+void insert(int[], int*, int);
+int del_hi_priori(int[], int*);
 
-int main(){
-    int choice, num, n, a[MAX], data, s;
-
-    int lb = 0;
-    n = 0;
+int main() {
+    int choice, data;
+    int heap[MAX];
+    int n = 0; // current size of the heap
 
     printf(".....MAIN MENU.....\n");
     printf("\n1. Insert\n");
-    printf("\n2. Delete\n");
-    printf("\n3. Display\n");
-    printf("\n4. Quit\n");
+    printf("2. Delete\n");
+    printf("3. Display\n");
+    printf("4. Quit\n");
 
-    while(1){
+    while (1) {
         printf("\nEnter Your Choice: ");
         scanf("%d", &choice);
-        switch(choice){
+        switch (choice) {
             case 1:
                 printf("Enter Data to be Inserted: ");
                 scanf("%d", &data);
-                insert(a, n, data, lb);
-                n++;
+                insert(heap, &n, data);
                 break;
             case 2:
-                s = del_hi_priori(a, n+1, lb);
-                if(s != 0)
-                    printf("\nThe Deleted Value is: %d\n", s);
-                if(n > 0)
-                    n--;
+                data = del_hi_priori(heap, &n);
+                if (data != -1)
+                    printf("\nThe Deleted Value is: %d\n", data);
                 break;
             case 3:
                 printf("\n");
-                display(a, n);
+                display(heap, n);
                 break;
             case 4:
                 return 0;
@@ -51,78 +47,63 @@ int main(){
     return 0;
 }
 
-void insert(int a[], int heapsize, int data, int lb){
-    int i, p;
-    int parent(int);
-    if(heapsize == MAX){
+void insert(int a[], int* heapsize, int data) {
+    if (*heapsize == MAX) {
         printf("Queue is Full!\n");
         return;
     }
-    i = lb + heapsize;
+
+    int i = (*heapsize)++;
     a[i] = data;
 
-    while(i > lb && a[p = parent(i)] < a[i]){
-        swap(&a[p], &a[i]);
-        i = p;
+    while (i != 0 && a[(i - 1) / 2] < a[i]) {
+        swap(&a[i], &a[(i - 1) / 2]);
+        i = (i - 1) / 2;
     }
 }
 
-int del_hi_priori(int a[], int heapsize, int lb){
-    int data, i, l, r, max_child, t;
-    int left(int);
-    int right(int);
-
-    if(heapsize == 1){
+int del_hi_priori(int a[], int* heapsize) {
+    if (*heapsize == 0) {
         printf("Queue is Empty!!\n");
-        return 0;
+        return -1; // Return -1 to indicate an empty heap
     }
-    t = a[lb];
-    swap(&a[lb], &a[heapsize - 1]);
-    i = lb;
-    heapsize--;
 
-    while(1){
-        l = left(i);        //
-        if(l >= heapsize)
-            break;
-        if((r = right(i)) >= heapsize)
+    int root = a[0];
+    a[0] = a[--(*heapsize)]; // Move the last element to the root
+    int i = 0;
+
+    while (1) {
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        int max_child = i;
+
+        if (l < *heapsize && a[l] > a[max_child])
             max_child = l;
-        else
-            max_child = (a[l] > a[r])?1:r;
-        if(a[i] >= a[max_child])
+        if (r < *heapsize && a[r] > a[max_child])
+            max_child = r;
+        if (max_child == i)
             break;
+
         swap(&a[i], &a[max_child]);
         i = max_child;
     }
-    return t;
+
+    return root;
 }
 
-int parent(int i){
-    return (i - 1) / 2;
-}
-
-int left(int i){
-    return 2*i+1;
-}
-
-int right(int i){
-    return 2*i+2;
-}
-
-void display(int a[], int n){
-    int i;
-    if(n == 0){
+void display(int a[], int n) {
+    if (n == 0) {
         printf("Queue is Empty!!\n");
         return;
     }
-    for(i = 0; i < n; i++)
+    int i;
+    for (i = 0; i < n; i++)
         printf("%d ", a[i]);
     printf("\n");
 }
 
-void swap(int *p, int *q){
-    int temp;
-    temp = *p;
+void swap(int *p, int *q) {
+    int temp = *p;
     *p = *q;
     *q = temp;
 }
